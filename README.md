@@ -44,7 +44,7 @@ Este projeto foi construído para a disciplina de Arquitetura de Computadores (P
 
 Assista ao nosso vídeo de apresentação com a explicação e a CPU em pleno funcionamento:
 
-[![Vídeo da Apresentação do Projeto](https://img.youtube.com/vi/0eAYIVUd_to/0.jpg)](https://youtu.be/vjuJkxry6SA)
+[![Vídeo da Apresentação do Projeto](https://img.youtube.com/vi/vjuJkxry6SA/0.jpg)](https://youtu.be/vjuJkxry6SA)
 
 *(Clique na miniatura acima para assistir ao vídeo no YouTube)*
 
@@ -177,7 +177,7 @@ Na seção inferior do `FINAL_BUILD`, carregue as matrizes de controle:
 
 | Integrante | RA (Registro Acadêmico) |
 |:---|:---|
-| **Emanuel Carneiro da Silva** | `082230018` |
+| **Emanuel Carneiro da Silva** | `082230017` |
 | **João Vitor Maciel Nai** | `082230004` |
 | **José Gabriel de Morais Souza** | `082230001` |
 
