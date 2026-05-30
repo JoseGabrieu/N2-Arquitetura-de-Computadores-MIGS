@@ -19,7 +19,7 @@ Projeto acadêmico de uma **CPU de 16 bits multi-ciclo** desenvolvida no **Logis
 ## Demonstração e Repositório
 
 - 🎥 **Vídeo da apresentação:**  
-  https://video.com
+  video
 ---
 
 # Visão Geral
