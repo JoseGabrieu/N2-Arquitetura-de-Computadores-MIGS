@@ -19,7 +19,7 @@ Projeto acadêmico de uma **CPU de 16 bits multi-ciclo** desenvolvida no **Logis
 ## Demonstração e Repositório
 
 - 🎥 **Vídeo da apresentação:**  
-  video
+  https://video.com
 ---
 
 # Visão Geral
@@ -366,7 +366,7 @@ A CPU pode escrever diretamente no buffer de vídeo para alterar os pixels exibi
 
 ## Requisitos
 
-- Logisim-evolution 3.8.0
+- Logisim-evolution 3.8.0 ou superior
 
 ---
 
@@ -375,60 +375,40 @@ A CPU pode escrever diretamente no buffer de vídeo para alterar os pixels exibi
 ### 1. Abrir o circuito
 
 - Abra o Logisim-evolution
-- Carregue `CPU.circ`
-- Selecione o circuito principal `CIRCUITO`
+- Carregue o arquivo `CPU16BIT.circ`
+- Selecione o circuito principal `FINAL_BUILD`
 
 ---
 
-### 2. Configurar a ROM
+### 2. Configurar a RAM
 
-Caso necessário:
+- Na RAM principal (parte superior), clique com o botão direito e selecione a opção `Carregar imagem...`
+- Selecione o arquivo `FINAL_ASSEMBLY_OS_WITH_TETRIS_RAM_FILE`
 
-- Clique com o botão direito na ROM
-- Selecione `Edit Contents...`
-- Insira o programa desejado
+---
+
+### 3. Configurar as ROMs
+
+- Na parte inferior do circuito principal, clique com o botão direito na primeira ROM e clique em `Carregar imagem...`
+- Selecione o arquivo `OPCODE_ROM_MICROCODE_1`
+- Clique com o botão direito na segunda ROM e clique em `Carregar imagem...`
+- Selecione o arquivo `OPCODE_ROM_MICROCODE_2`
+- Clique com o botão direito na terceira ROM e clique em `Carregar imagem...`
+- Selecione o arquivo `OPCODE_ROM_MICROCODE_3`
 
 ---
 
 ### 3. Inicializar o sistema
 
-- Zere PC e registradores
-- Utilize `INSTRUCT_RESET`
-- Habilite `clk_enb`
+- Pressione `CTRL + K` para habilitar o pulso no simulador
+- Na parte superior do simulador, clique me `Simular` > `Frequência de pulso` e escolha `2.0 kHz` (valor sugerido para melhor experiência)
+- Na parte inferior direita do circuito principal, habilite o `clock` no botão `clk_enb`
 
 ---
 
 ### 4. Iniciar simulação
 
-No menu:
-
-```text
-Simulate → Ticks Enabled
-```
-
----
-
-### 5. Execução passo a passo
-
-Para depuração:
-
-```text
-Simulate → Tick Once
-```
-
-Monitore:
-
-- PC
-- IR
-- AC
-- RB
-- FLAGS
-- MAR
-- CONTADOR_CICLO
-- RAM
-- Pilha
-- TTY
-- Display
+- Logo abaixo do `TTY` há um `teclado` para digitar os comandos
 
 ---
 
