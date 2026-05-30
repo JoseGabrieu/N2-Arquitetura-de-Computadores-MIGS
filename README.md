@@ -1,430 +1,188 @@
-# CPU de 16 Bits – N2 (Logisim-evolution)
+# 💻 CPU de 16 Bits Multi-Ciclo
 
-Projeto acadêmico de uma **CPU de 16 bits multi-ciclo** desenvolvida no **Logisim-evolution**, com suporte a memória, pilha e periféricos mapeados em hardware.
+[![Logisim-evolution](https://img.shields.io/badge/Logisim--evolution-3.8.0-blue?style=flat-square&logo=logisim)](https://github.com/logisim-evolution/logisim-evolution)
+![Disciplina](https://img.shields.io/badge/Disciplina-Arquitetura_de_Computadores-brightgreen?style=flat-square)
+![Avaliação](https://img.shields.io/badge/Avaliação-N2-orange?style=flat-square)
 
----
-
-## Informações do Projeto
-
-| Item | Detalhes |
-|---|---|
-| Disciplina | Arquitetura de Computadores |
-| Avaliação | N2 |
-| Ferramenta | Logisim-evolution 3.8.0 |
-| Arquivo principal | `CPU.circ` |
-| Professor | Vinícius S. Borges |
+> Projeto acadêmico de uma **CPU de 16 bits multi-ciclo** desenvolvida no simulador **Logisim-evolution**, com suporte completo a memória de dados e instruções, arquitetura de pilha e periféricos mapeados em hardware.
 
 ---
 
-## Demonstração e Repositório
+## 📌 Índice
+- [Visão Geral](#-visão-geral)
+- [Demonstração](#-demonstração)
+- [Arquitetura da CPU](#arquitetura-da-cpu)
+- [Registradores Principais](#registradores-principais)
+- [Unidade de Controle](#-unidade-de-controle)
+- [Datapath](#datapath)
+- [ULA (Unidade Lógica e Aritmética)](#-ula-unidade-lógica-e-aritmética)
+- [Execução Multi-Ciclo](#-execução-multi-ciclo)
+- [Memória e Periféricos](#-memória-e-periféricos)
+- [Como Executar](#-como-executar)
+- [Equipe](#-equipe)
+- [Referências](#-referências)
 
-- 🎥 **Vídeo da apresentação:**  
-  video
 ---
 
-# Visão Geral
+## 📖 Visão Geral
 
-Este projeto implementa uma **CPU de 16 bits baseada em arquitetura multi-ciclo**
+Este projeto foi construído para a disciplina de Arquitetura de Computadores (Prof. **Vinícius da Silva Borges**). O arquivo principal de desenvolvimento é o `CPU16BIT.circ`. 
 
-Esta CPU possui:
-
+**A arquitetura implementada inclui:**
 - Arquitetura **multi-ciclo**
-- Unidade de controle sequencial
-- Registradores dedicados
-- Controle explícito de micro-etapas
-- Memória de programa e memória de dados
-- Sistema de pilha
-- Periféricos mapeados em memória
-- Saída TTY
-- Sistema de vídeo com display matricial
+- Unidade de controle sequencial baseada em contador
+- Registradores de uso geral e dedicados
+- Controle explícito de micro-etapas de máquina
+- Separação entre Memória de Programa (ROM) e Memória de Dados (RAM)
+- Sistema nativo de Pilha (Stack)
+- Periféricos com I/O mapeado em memória
+- Interação por saída **TTY** e sistema de **Vídeo Matricial**
 
 ---
 
-# Arquitetura da CPU
+## 🎥 Demonstração
 
-## Especificações Gerais
+Assista ao nosso vídeo de apresentação com a explicação e a CPU em pleno funcionamento:
 
-| Característica | Valor |
-|---|---|
-| Largura de dados | 16 bits |
-| Largura de endereços | 16 bits |
-| Espaço de endereçamento | 2¹⁶ posições |
-| Modelo de execução | Multi-ciclo |
-| Clock | Global (`CLK`) |
-| Enable de clock | `clk_enb` |
+[![Vídeo da Apresentação do Projeto](https://img.youtube.com/vi/0eAYIVUd_to/0.jpg)](https://youtu.be/vjuJkxry6SA)
+
+*(Clique na miniatura acima para assistir ao vídeo no YouTube)*
 
 ---
 
-# Registradores Principais
+<a id="arquitetura-da-cpu"></a>
+## ⚙️ Arquitetura da CPU
 
-## `CONTADOR_DE_PROGRAMA` (PC)
+### Especificações Gerais
 
-Responsável por armazenar o endereço da próxima instrução a ser buscada na ROM.
-
----
-
-## `REGISTRADOR_DE_INSTRUCAO` (IR)
-
-Armazena a instrução atual durante as etapas de busca, decodificação e execução.
-
----
-
-## `REGISTRADOR_DE_ENDERECO_DE_MEMORIA` (MAR)
-
-Responsável pelos endereços utilizados nos acessos à RAM e periféricos mapeados.
+| Característica | Detalhes |
+|:---|:---|
+| **Largura de Dados** | 16 bits |
+| **Largura de Endereços** | 16 bits |
+| **Espaço de Endereçamento** | 2¹⁶ posições disponíveis |
+| **Modelo de Execução** | Múltiplos ciclos por instrução |
+| **Sinal de Clock** | Sincronismo Global (`CLK`) |
+| **Habilitação (Enable)** | Pino `clk_enb` |
 
 ---
 
-## `ACUMULADOR` (AC)
+<a id="registradores-principais"></a>
+## 🗄️ Registradores Principais
 
-Principal registrador utilizado pela ULA para operações aritméticas e lógicas.
+O datapath desta CPU é munido com vários registradores que desempenham funções específicas no ciclo de busca e execução:
 
----
-
-## `REGISTRADOR_B` (RB)
-
-Segundo operando utilizado pela ULA e também em operações de memória e pilha.
-
----
-
-## `REGISTRADORES_Y_E_Y`
-
-Registradores auxiliares utilizados em micro-operações intermediárias do datapath.
+* **`CONTADOR_DE_PROGRAMA` (PC):** Armazena o endereço da próxima instrução a ser buscada na memória ROM.
+* **`REGISTRADOR_DE_INSTRUCAO` (IR):** Armazena a instrução atual durante as etapas de busca, decodificação e execução.
+* **`REGISTRADOR_DE_ENDERECO_DE_MEMORIA` (MAR):** Responsável por fornecer à RAM e aos periféricos mapeados o endereço de acesso.
+* **`ACUMULADOR` (AC):** O registrador primário para as operações lógico-aritméticas computadas pela ULA.
+* **`REGISTRADOR_B` (RB):** O segundo operando da ULA; utilizado também nas transferências de memória e uso da pilha.
+* **`REGISTRADORES_Y_E_Z`:** Registradores auxiliares para a retenção de dados temporários durante micro-operações.
+* **`FLAGS`:** Conjunto de sinalizadores alterados pela ULA (como **Z**ero e **C**arry) fundamentais para os desvios e testes condicionais executados pela Unidade de Controle.
+* **`REGISTRADOR_TTY` / `REGISTER_SAIDA`:** Registradores acoplados à interface de monitoramento e envio de dados para as telas e debug.
 
 ---
 
-## `FLAGS`
+## 🧠 Unidade de Controle
 
-Conjunto de flags da CPU, utilizado para:
+A CPU possui uma **Unidade de Controle distribuída** orientada por um Contador de Ciclos (`CONTADOR_CICLO`). Em conjunto com o circuito combinacional e o Opcode lido do `IR`, ela atua em cada etapa gerando com precisão os sinais ativadores para todo o sistema.
 
-- Zero (`Z`)
-- Carry (`C`)
-- Outros sinais condicionais
-
-Essas flags são atualizadas pela ULA e utilizadas pela unidade de controle.
-
----
-
-## `REGISTRADOR_TTY`
-
-Registrador associado ao periférico TTY responsável pela saída textual/numérica.
+**Exemplos de Sinais de Controle gerados:**
+- **Registradores:** Ativação de carregamento (`*_LOAD`) e saída (`*_EN`).
+- **ULA:** Seletores de operação (`ADD`, `SUB`, `A_XOR_B`).
+- **Memória:** Configuração de barramento (`ADDRESS_WRITE`, `ADDRESS_SELECT`, `RAM_IN`).
+- **Pilha:** Controle dinâmico (`STACK_UP`, `STACK_DOWN`, `STACK_STORE`, `STACK_DATA_OUT`).
 
 ---
 
-## `REGISTER_SAIDA`
 
-Registrador auxiliar utilizado para depuração e monitoramento interno.
+<a id="datapath"></a>
+## 🛤️ Datapath
 
----
+O componente `CIRCUITO` orquestra o caminho de dados entre as memórias, controladores e lógica funcional.
 
-# Unidade de Controle
-
-A unidade de controle foi implementada de forma distribuída utilizando:
-
-- Contador de ciclos (`CONTADOR_CICLO`)
-- Lógica combinacional baseada em:
-  - Opcode da instrução
-  - Estado atual do contador de ciclos
-
-Essa lógica gera os sinais responsáveis por:
-
-- Escrita em registradores
-- Controle da ULA
-- Controle da RAM
-- Manipulação de pilha
-- Escrita em periféricos
-- Controle de vídeo
-
-## Exemplos de sinais de controle
-
-### Registradores
-
-- `*_LOAD`
-- `*_EN`
-
-### ULA
-
-- `ADD`
-- `SUB`
-- `A_XOR_B`
-
-### Memória
-
-- `ADDRESS_WRITE`
-- `ADDRESS_SELECT`
-- `RAM_IN`
-
-### Pilha
-
-- `STACK_UP`
-- `STACK_DOWN`
-- `STACK_STORE`
-- `STACK_DATA_OUT`
+1. **PC → ROM → IR:** O PC aponta para a instrução na ROM, que devolve uma word de 16 bits para o IR armazenar.
+2. **IR → Unidade de Controle:** As linhas de opcode alimentam a Unidade de Controle, despachando os sinais que guiarão as próximas rotas.
+3. **Fluxo de Operação (AC / RB / ULA):** Os operandos circulam nos registradores principais (AC, RB, auxiliares) e passam pela ULA. O resultado retorna para retroalimentar os registradores, subir à memória ou enviar artefatos de vídeo para o TTY/Display.
+4. **MAR / RAM / Periféricos:** O barramento de endereçamento do sistema é isolado pelo MAR, que coordena leituras e escritas determinando se o destino é a RAM, a placa de vídeo ou registradores dos periféricos de hardware.
 
 ---
 
-# Datapath
+## 🧮 ULA (Unidade Lógica e Aritmética)
 
-O circuito principal (`CIRCUITO`) organiza o fluxo de dados entre os componentes da CPU.
+Nossa sub-unidade lógica (`ULA`) tem largura total de 16 bits.
 
-## Fluxo principal
-
-### PC → ROM → IR
-
-1. O PC fornece o endereço da instrução.
-2. A ROM retorna a palavra de 16 bits.
-3. A instrução é armazenada no IR.
+- **Operações Aritméticas Implementadas:** Soma (`ADD`) e Subtração (`SUB`).
+- **Operações Lógicas Implementadas:** XOR Lógico (`A_XOR_B`).
+- **Comportamento de Flags:** Fornece as flags operacionais ao sistema, como Zero e Carry, permitindo que a CPU decida ramificações de fluxo de maneira condicional (`Branch if Equal`, etc.).
 
 ---
 
-### IR → Unidade de Controle
+## 🔄 Execução Multi-Ciclo
 
-A instrução armazenada é decodificada pela unidade de controle, que define:
+A arquitetura segmenta cada instrução em partes menores ditadas pelo `CONTADOR_CICLO`.
 
-- Operações da ULA
-- Escrita/leitura de memória
-- Manipulação de pilha
-- Atualização de registradores
-
----
-
-### AC / RB / ULA
-
-Os dados trafegam entre:
-
-- `ACUMULADOR`
-- `REGISTRADOR_B`
-- Registradores auxiliares
-- ULA
-
-A saída da ULA pode:
-
-- Atualizar registradores
-- Ser escrita em memória
-- Ser enviada ao TTY
-- Atualizar o vídeo
+- **1. Fetch:** Leitura da instrução apontada na ROM e salvamento destas informações dentro do IR.
+- **2. Decode:** Interpretação isolada dos bits de opcode e levantamento prévio de barramentos internos.
+- **3. Execute:** Comandos engatilhados pela decodificação entram em vigor (processamento da ULA, requisições de endereços, alterações no ponteiro de pilha).
+- **4. Write-back:** Fase terminal onde o Acumulador e os registradores são alimentados com o resultado final, o PC é atualizado e os ciclos de relógio são reiniciados para buscar a próxima instrução.
 
 ---
 
-### MAR / RAM / Periféricos
+## 💾 Memória e Periféricos
 
-O MAR controla os acessos de leitura e escrita em:
+### Memórias
+* **ROM (Memória de Programa):** Memória exclusiva de leitura (16-bit word / 16-bit addressing). As instruções devem ser gravadas pelo Logisim (*clique com o botão direito* ➔ *Edit Contents*).
+* **RAM (Memória de Dados):** Arquitetura encarregada de manter as variáveis dinâmicas, o espaço Stack e manter mapeadas as regiões relativas aos componentes periféricos controlados pelo `MAR`.
 
-- RAM
-- Pilha
-- Buffer de vídeo
-- Periféricos mapeados
+### Pilha (Stack Pointer)
+O sistema provê suporte nativo a controle de pilha. A manipulação do ponteiro na RAM ocorre dinamicamente por intermédio dos sinais `STACK_UP`, `STACK_DOWN`, `STACK_STORE` e `STACK_DATA_OUT`.
 
----
-
-# ULA (Unidade Lógica e Aritmética)
-
-A ULA está encapsulada no subcircuito `ULA` e opera com largura de 16 bits.
-
-## Operações implementadas
-
-### Aritméticas
-
-- `ADD`
-- `SUB`
-
-### Lógicas
-
-- `A_XOR_B`
+### Sistemas Externos (Vídeo & TTY)
+* **TTY:** Terminal mapeado no `REGISTRADOR_TTY` para impressão sequencial de texto e depuração.
+* **Sistema de Vídeo:** Uma matriz de display simulada (8x8) sustentada pelos circuitos `PLACA_DE_VIDEO` e `BUFFER_VIDEO`. O datapath pode injetar pixels diretamente no Framebuffer alterando a visualização gráfica durante o código.
 
 ---
 
-## Flags geradas
+## 🚀 Como Executar
 
-A ULA atualiza sinais utilizados pela unidade de controle, como:
+**Pré-Requisito:** `Logisim-evolution` (versão 3.8.0 ou superior).
 
-- Zero
-- Carry
+Siga as instruções passo a passo para carregar e iniciar a CPU:
 
-Essas flags permitem a implementação de desvios condicionais e decisões de fluxo.
+### 1. Abrir o projeto
+1. Abra o Logisim-evolution.
+2. Acesse `Arquivo > Abrir` e carregue o `CPU16BIT.circ`.
+3. Na árvore à esquerda, clique e expanda sobre o projeto, e abra o circuito principal chamado **`FINAL_BUILD`**.
 
----
+### 2. Configurar a RAM (Sistema Base)
+1. Procure pelo componente de **RAM principal** na parte superior do circuito.
+2. Clique com o botão direito nela e selecione a opção **`Carregar imagem...`**.
+3. Localize e selecione o arquivo: `FINAL_ASSEMBLY_OS_WITH_TETRIS_RAM_FILE`.
 
-# Execução Multi-Ciclo
+### 3. Configurar o Microcódigo nas ROMs
+Na seção inferior do `FINAL_BUILD`, carregue as matrizes de controle:
+1. Clique com o botão direito na **primeira ROM**, escolha **`Carregar imagem...`** e selecione `OPCODE_ROM_MICROCODE_1`.
+2. Clique com o botão direito na **segunda ROM**, escolha **`Carregar imagem...`** e selecione `OPCODE_ROM_MICROCODE_2`.
+3. Clique com o botão direito na **terceira ROM**, escolha **`Carregar imagem...`** e selecione `OPCODE_ROM_MICROCODE_3`.
 
-O controle de execução é realizado pelo subcircuito `CONTADOR_CICLO`.
-
-Cada instrução é dividida em múltiplas etapas.
-
-## Fluxo de execução
-
-### 1. Fetch
-
-- Leitura da instrução na ROM
-- Carregamento no IR
-
----
-
-### 2. Decode
-
-- Interpretação do opcode
-- Preparação dos sinais de controle
+### 4. Inicializar a Simulação
+1. Habilite o sinal do Clock acendendo a chave/botão **`clk_enb`** localizada na porção inferior direita do projeto.
+2. Configure a frequência do Clock: No menu do topo vá em `Simular` > `Frequência de pulso` e escolha **`2.0 kHz`** *(esta é a velocidade ideal testada)*.
+3. Ative os pulsos de clock pressionando as teclas **`CTRL + K`**.
+4. Abaixo do terminal **TTY**, utilize a ferramenta "Teclado" para interagir com o terminal simulado!
 
 ---
 
-### 3. Execute
+## 👥 Equipe
 
-Execução efetiva da instrução:
-
-- Operações da ULA
-- Acesso à memória
-- Manipulação de pilha
-- Escrita em periféricos
-
----
-
-### 4. Write-back
-
-- Atualização de registradores
-- Atualização do PC
-- Reinicialização do contador de ciclos
+| Integrante | RA (Registro Acadêmico) |
+|:---|:---|
+| **Emanuel Carneiro da Silva** | `082230018` |
+| **João Vitor Maciel Nai** | `082230004` |
+| **José Gabriel de Morais Souza** | `082230001` |
 
 ---
 
-# Memória e Periféricos
+## 🔗 Referências
 
-# ROM (Memória de Programa)
-
-| Propriedade | Valor |
-|---|---|
-| Tipo | ROM |
-| Endereçamento | 16 bits |
-| Dados | 16 bits |
-
-O programa é armazenado diretamente no componente ROM do Logisim.
-
-## Alterando o programa
-
-1. Clique com o botão direito na ROM
-2. Selecione `Edit Contents...`
-3. Edite os valores desejados
-4. Salve as alterações
-
----
-
-# RAM (Memória de Dados)
-
-Utilizada para:
-
-- Variáveis
-- Pilha
-- Dados intermediários
-- Regiões mapeadas
-
-Controlada principalmente pelo registrador MAR.
-
----
-
-# Pilha
-
-A pilha utiliza sinais específicos para manipulação:
-
-| Sinal | Função |
-|---|---|
-| `STACK_UP` | Push |
-| `STACK_DOWN` | Pop |
-| `STACK_STORE` | Escrita |
-| `STACK_DATA_OUT` | Leitura |
-
-A implementação utiliza:
-
-- Ponteiro de pilha
-- Área reservada da RAM
-
----
-
-# TTY
-
-O periférico TTY permite saída textual/numérica através do registrador:
-
-- `REGISTRADOR_TTY`
-
-Usado principalmente para depuração e exibição de resultados.
-
----
-
-# Sistema de Vídeo
-
-O sistema gráfico é composto pelos seguintes subcircuitos:
-
-| Subcircuito | Função |
-|---|---|
-| `PLACA_DE_VIDEO` | Controle de escrita de vídeo |
-| `BUFFEFR_VIDEO` | Framebuffer |
-| `DISPLAY` | Matriz 8×8 |
-
-A CPU pode escrever diretamente no buffer de vídeo para alterar os pixels exibidos.
-
----
-
-# Como Executar
-
-## Requisitos
-
-- Logisim-evolution 3.8.0 ou superior
-
----
-
-## Executando o projeto
-
-### 1. Abrir o circuito
-
-- Abra o Logisim-evolution
-- Carregue o arquivo `CPU16BIT.circ`
-- Selecione o circuito principal `FINAL_BUILD`
-
----
-
-### 2. Configurar a RAM
-
-- Na RAM principal (parte superior), clique com o botão direito e selecione a opção `Carregar imagem...`
-- Selecione o arquivo `FINAL_ASSEMBLY_OS_WITH_TETRIS_RAM_FILE`
-
----
-
-### 3. Configurar as ROMs
-
-- Na parte inferior do circuito principal, clique com o botão direito na primeira ROM e clique em `Carregar imagem...`
-- Selecione o arquivo `OPCODE_ROM_MICROCODE_1`
-- Clique com o botão direito na segunda ROM e clique em `Carregar imagem...`
-- Selecione o arquivo `OPCODE_ROM_MICROCODE_2`
-- Clique com o botão direito na terceira ROM e clique em `Carregar imagem...`
-- Selecione o arquivo `OPCODE_ROM_MICROCODE_3`
-
----
-
-### 3. Inicializar o sistema
-
-- Pressione `CTRL + K` para habilitar o pulso no simulador
-- Na parte superior do simulador, clique me `Simular` > `Frequência de pulso` e escolha `2.0 kHz` (valor sugerido para melhor experiência)
-- Na parte inferior direita do circuito principal, habilite o `clock` no botão `clk_enb`
-
----
-
-### 4. Iniciar simulação
-
-- Logo abaixo do `TTY` há um `teclado` para digitar os comandos
-
----
-
-# Equipe
-
-| Integrante | RA |
-|---|---|
-| Emanuel Carneiro da Silva | 082230018 |
-| João Vitor Maciel Nai | 082230004 |
-| José Gabriel de Morais Souza | 082230001 |
-
----
-
-# Referências
-
-- 🎥 Vídeo de inspiração:  
-  https://www.youtube.com/watch?v=GRM1Oc3erew
-
----
+- 🎥 **Vídeo de Inspiração:** [16-BIT CPU with RegisterFile Tutorial! Part 1 - The ALU.](https://www.youtube.com/watch?v=GRM1Oc3erew)
